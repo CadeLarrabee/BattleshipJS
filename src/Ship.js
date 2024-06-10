@@ -1,6 +1,8 @@
 class Ship {
-  constructor(length) {
+  constructor(type, length, coordinates) {
+    this.type = type;
     this.length = length;
+    this.coordinates = coordinates;
     this.hits = 0;
   }
 
@@ -18,8 +20,11 @@ class Ship {
   getHits() {
     return this.hits;
   }
+  getCoordinates() {
+    return this.coordinates;
+  }
   getLength() {
     return this.length;
   }
 }
-module.exports = Ship;
+export default Ship;

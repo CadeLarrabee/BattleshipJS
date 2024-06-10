@@ -5,4 +5,11 @@ class Tile {
     this.isHit = false;
     this.hasShip = false;
   }
+  setShip(bool) {
+    this.hasShip = bool;
+  }
+  getShip() {
+    return this.hasShip;
+  }
 }
+export default Tile;

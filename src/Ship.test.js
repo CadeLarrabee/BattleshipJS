@@ -1,21 +1,30 @@
-const Ship = require("./Ship.js");
+import Ship from "./Ship.js";
 
-test("Expect ship length to be 3", () => {
-  const ship = new Ship(3);
-  expect(ship.getLength()).toBe(3);
-});
+describe("Ship functions", () => {
+  let ship;
 
-test("Expect Ship sunk to be true", () => {
-  const ship = new Ship(3);
-  ship.addHit();
-  ship.addHit();
-  ship.addHit();
-  expect(ship.isSunk()).toBe(true);
-});
+  beforeEach(() => {
+    ship = new Ship(null, 3, [
+      [0, 1],
+      [0, 2],
+      [0, 3],
+    ]);
+  });
 
-test("Expect ship hits to be 2", () => {
-  const ship = new Ship(3);
-  ship.addHit();
-  ship.addHit();
-  expect(ship.getHits()).toBe(2);
+  test("Expect ship length to be 3", () => {
+    expect(ship.getLength()).toBe(3);
+  });
+
+  test("Expect Ship sunk to be true", () => {
+    ship.addHit();
+    ship.addHit();
+    ship.addHit();
+    expect(ship.isSunk()).toBe(true);
+  });
+
+  test("Expect ship hits to be 2", () => {
+    ship.addHit();
+    ship.addHit();
+    expect(ship.getHits()).toBe(2);
+  });
 });
