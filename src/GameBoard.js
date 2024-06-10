@@ -5,6 +5,7 @@ class gameBoard {
   constructor() {
     this.board = this.setupNewBoard(10, 10);
     this.ships = [];
+    this.Shots = [];
   }
   setupNewBoard(length, height) {
     let board = [];
@@ -33,6 +34,16 @@ class gameBoard {
     if (index !== -1) {
       this.ships.splice(index, 1);
     }
+  }
+  receiveAttack(coordinate) {
+    const ship = this.board[coordinate[0]][coordinate[1]].getShip();
+    if (ship) {
+      ship.addHit();
+      if (ship.isSunk()) {
+        removeShipFromBoard(ship);
+      }
+    }
+    this.Shots.push(coordinate);
   }
 }
 

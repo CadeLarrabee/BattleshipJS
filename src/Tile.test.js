@@ -11,4 +11,8 @@ describe("Ship functions", () => {
     tile.setShip(true);
     expect(tile.getShip()).toBe(true);
   });
+  test("Expect hasShip to be true", () => {
+    tile.setHit(true);
+    expect(tile.getHit()).toBe(true);
+  });
 });

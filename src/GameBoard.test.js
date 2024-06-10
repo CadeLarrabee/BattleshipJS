@@ -34,4 +34,8 @@ describe("Gameboard functions", () => {
     expect(testBoard.board[0][3].getShip()).toEqual(false);
     expect(testBoard.board.ships).toEqual(undefined);
   });
+  test("receive attack", () => {
+    testBoard.board[0][1].setHit(true);
+    expect(testBoard.board[0][1].getHit()).toEqual(true);
+  });
 });

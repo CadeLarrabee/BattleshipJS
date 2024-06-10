@@ -11,5 +11,11 @@ class Tile {
   getShip() {
     return this.hasShip;
   }
+  setHit(bool) {
+    this.isHit = bool;
+  }
+  getHit() {
+    return this.isHit;
+  }
 }
 export default Tile;
