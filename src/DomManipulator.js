@@ -34,7 +34,7 @@ class DomManip {
       "playerBoard"
     );
 
-    const boardTiles = this.generateBoard(player);
+    const boardTileWrapper = this.generateBoard(player);
 
     //   navDefProj.addEventListener("click", () => {
     //     const bodyProjWrapper = document.querySelector(".projBodyWrapper");
@@ -44,7 +44,7 @@ class DomManip {
     mainWrapper.appendChild(playerPanel);
     playerPanel.appendChild(playerTextPanel);
     playerPanel.appendChild(playerBoardPanel);
-    playerBoardPanel.appendChild(boardTiles);
+    playerBoardPanel.appendChild(boardTileWrapper);
   }
   generateBoard(player) {
     const boardWrapper = document.createElement("div");
@@ -63,6 +63,8 @@ class DomManip {
       // Add additional attributes or content to the square if needed
       row.appendChild(square);
     });
+
+    return boardWrapper;
   }
 }
 
