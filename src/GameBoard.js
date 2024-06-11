@@ -26,6 +26,7 @@ class gameBoard {
     return ship;
   }
   removeShipFromBoard(ship) {
+    //removes a ship from the board and returns true if there are no ships left
     const coordinateArr = ship.getCoordinates();
     coordinateArr.forEach((coordinate) => {
       this.board[coordinate[0]][coordinate[1]].setShip(false);
@@ -33,6 +34,15 @@ class gameBoard {
     const index = this.ships.indexOf(ship);
     if (index !== -1) {
       this.ships.splice(index, 1);
+    }
+    return this.allShipsSunk();
+  }
+  allShipsSunk() {
+    if (this.ships == []) {
+      console.log("All ships sunk on gameboard: ", this.gameBoard);
+      return true;
+    } else {
+      return false;
     }
   }
   receiveAttack(coordinate) {
