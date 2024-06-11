@@ -1,4 +1,5 @@
-function OnEntry() {}
+import DomManip from "./DomManipulator.js";
 
-OnEntry();
+const domManip = new DomManip();
+DomManip.OnEntry();
 //
