@@ -16,7 +16,7 @@ class DomManip {
     const playerPanel = document.createElement("div");
     const playerTextPanel = document.createElement("div");
     const playerBoardPanel = document.createElement("div");
-    const player = new Player();
+    const player = new Player("Human", playerId);
 
     playerPanel.classList.add("PlayerPanel");
 
@@ -52,14 +52,17 @@ class DomManip {
 
     let row;
 
-    player.board.forEach((tile, index) => {
+    //To do, refactor this to go by the boards actual data.
+    //Its already in rows so we don't need a row system like this one.
+
+    player.gameBoard.board.forEach((tile, index) => {
       if (index % 10 === 0) {
         row = document.createElement("div");
         row.classList.add("row");
         boardWrapper.appendChild(row);
       }
       const square = document.createElement("div");
-      square.classList.add("PlayerPanel", "player" + playerId, "tile");
+      square.classList.add("PlayerPanel", "player" + player.playerId, "tile");
       // Add additional attributes or content to the square if needed
       row.appendChild(square);
     });
