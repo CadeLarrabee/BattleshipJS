@@ -1,11 +1,10 @@
-import gameBoard from "./GameBoard.js";
-import Tile from "./Tile.js";
+import GameState from "./GameState.js";
 
-describe("Gameboard functions", () => {
-  let testBoard;
+describe("GameState functions", () => {
+  let gameState;
 
   beforeEach(() => {
-    testBoard = new gameBoard();
+    gameState = new GameState();
   });
 
   test("expect game board to be 100 cells", () => {
@@ -34,7 +33,6 @@ describe("Gameboard functions", () => {
     expect(testBoard.board[0][3].getShip()).toEqual(false);
     expect(testBoard.board.ships).toEqual(undefined);
   });
-
   test("receive attack", () => {
     testBoard.board[0][1].setHit(true);
     expect(testBoard.board[0][1].getHit()).toEqual(true);

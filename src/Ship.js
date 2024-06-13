@@ -4,6 +4,7 @@ class Ship {
     this.length = length;
     this.coordinates = coordinates;
     this.hits = 0;
+    this.rotation = 0;
   }
 
   isSunk() {
@@ -17,8 +18,25 @@ class Ship {
   addHit() {
     this.hits += 1;
   }
+  addRotation() {
+    if (this.rotation == 270) {
+      this.rotation = 0;
+    } else {
+      this.rotation += 90;
+    }
+  }
+  subtractRotation() {
+    if (this.rotation == 0) {
+      this.rotation = 270;
+    } else {
+      this.rotation -= 90;
+    }
+  }
   getHits() {
     return this.hits;
+  }
+  getRotation() {
+    return this.rotation;
   }
   getCoordinates() {
     return this.coordinates;

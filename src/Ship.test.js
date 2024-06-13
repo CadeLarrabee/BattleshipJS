@@ -22,6 +22,34 @@ describe("Ship functions", () => {
     expect(ship.isSunk()).toBe(true);
   });
 
+  test("Expect Ship rotation to be 180", () => {
+    ship.addRotation();
+    ship.addRotation();
+    expect(ship.getRotation()).toBe(180);
+  });
+
+  test("Expect four Ship rotations to be 0", () => {
+    ship.addRotation();
+    ship.addRotation();
+    ship.addRotation();
+    ship.addRotation();
+    expect(ship.getRotation()).toBe(0);
+  });
+
+  test("Expect Ship rotation to be 180", () => {
+    ship.subtractRotation();
+    ship.subtractRotation();
+    expect(ship.getRotation()).toBe(180);
+  });
+
+  test("Expect four Ship rotations to be 0", () => {
+    ship.subtractRotation();
+    ship.subtractRotation();
+    ship.subtractRotation();
+    ship.subtractRotation();
+    expect(ship.getRotation()).toBe(0);
+  });
+
   test("Expect ship hits to be 2", () => {
     ship.addHit();
     ship.addHit();
