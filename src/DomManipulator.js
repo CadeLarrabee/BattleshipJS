@@ -3,21 +3,71 @@ import GameState from "./GameState.js";
 
 class DomManip {
   constructor() {
-    let selectedTiles = [];
-    let shipType = null;
+    this.selectedTiles = [];
+    this.shipTypes = [
+      { name: "Carrier", length: 5 },
+      { name: "Battleship", length: 4 },
+      { name: "Cruiser", length: 3 },
+      { name: "Submarine", length: 3 },
+      { name: "Destroyer", length: 2 },
+    ];
+    this.selectedShip = undefined;
+    this.players = [];
   }
   onEntry() {
     const mainWrapper = this.generateMainWrapper();
+    const navWrapper = this.generateNavWrapper(mainWrapper);
+    const playerBoardWrapper = this.generatePlayerBoardWrapper(mainWrapper);
     let gameState = new GameState();
-    this.generateStateWrapper(mainWrapper, gameState);
-    this.generatePlayer("Human", 1, mainWrapper, gameState);
-    this.generatePlayer("Human", 2, mainWrapper, gameState);
+    this.generateStateWrapper(playerBoardWrapper, gameState);
+    this.players.push(
+      this.generatePlayer("Human", 1, playerBoardWrapper, gameState)
+    );
+    this.generateShipSetupPanel(navWrapper, this.players[0]);
+    this.players.push(
+      this.generatePlayer("Human", 2, playerBoardWrapper, gameState)
+    );
   }
   generateMainWrapper() {
     const mainProjPanelWrapper = document.createElement("div");
     mainProjPanelWrapper.classList.add("mainWrapper");
     document.body.appendChild(mainProjPanelWrapper);
     return mainProjPanelWrapper;
+  }
+  generatePlayerBoardWrapper(mainWrapper) {
+    const playerBoardWrapper = document.createElement("div");
+    playerBoardWrapper.classList.add("playerBoardWrapper");
+    mainWrapper.appendChild(playerBoardWrapper);
+    return playerBoardWrapper;
+  }
+  generateNavWrapper(mainWrapper) {
+    const navWrapper = document.createElement("div");
+    navWrapper.classList.add("navWrapper");
+    mainWrapper.appendChild(navWrapper);
+    return navWrapper;
+  }
+  generateShipSetupPanel(navWrapper) {
+    this.shipTypes.forEach((ship) => {
+      this.addShipToNavPanel(ship, navWrapper);
+    });
+  }
+  addShipToNavPanel(ship, navWrapper) {
+    const shipWrapper = document.createElement("div");
+    const shipTitle = document.createElement("div");
+
+    shipTitle.classList.add("shipTitle");
+    shipTitle.textContent = ship.name;
+    shipWrapper.classList.add("shipWrapper");
+    shipWrapper.dataset.shipType = ship.name;
+    shipWrapper.dataset.shipLength = ship.length;
+
+    shipWrapper.addEventListener("click", () => {
+      this.selectedShip = ship;
+      shipWrapper.classList.add("selected");
+    });
+
+    shipWrapper.appendChild(shipTitle);
+    navWrapper.appendChild(shipWrapper);
   }
   generateStateWrapper(mainWrapper, gameState) {
     const currentStateWrapper = document.createElement("div");
@@ -45,27 +95,22 @@ class DomManip {
     const playerPanel = document.createElement("div");
     const playerTextPanel = document.createElement("div");
     const playerBoardPanel = document.createElement("div");
-    const player = new Player("Human", playerId);
+    const player = new Player(type, playerId);
 
     playerPanel.classList.add("PlayerPanel");
 
     playerTextPanel.classList.add("player" + playerId, "playerText");
-
     playerTextPanel.textContent = "Player " + playerId;
 
     playerBoardPanel.classList.add("player" + playerId, "playerBoard");
 
     const boardTileWrapper = this.generateBoard(player, gameState);
 
-    //   navDefProj.addEventListener("click", () => {
-    //     const bodyProjWrapper = document.querySelector(".projBodyWrapper");
-    //     this.GenerateProjectPanel(bodyProjWrapper, project);
-    //   });
-
     mainWrapper.appendChild(playerPanel);
     playerPanel.appendChild(playerTextPanel);
     playerPanel.appendChild(playerBoardPanel);
     playerBoardPanel.appendChild(boardTileWrapper);
+    return player;
   }
   generateBoard(player, gameState) {
     const boardWrapper = document.createElement("div");
