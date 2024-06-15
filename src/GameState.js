@@ -9,8 +9,9 @@ class GameState {
   //2 - player ones turn
   //3 - player twos turn
   //
-  constructor(state) {
+  constructor(state, currentPlayer) {
     this.state = state ?? 0;
+    this.currentPlayer = currentPlayer ?? 0;
   }
   setState(state) {
     this.state = state;

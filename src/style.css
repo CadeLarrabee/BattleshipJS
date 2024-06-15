@@ -75,10 +75,13 @@
   align-items: center;
   justify-content: center;
 }
+.hover {
+  background-color: white;
+}
 .hidden {
   background-color: black;
 }
-.selected {
+.navShipSelected {
   background-color: navajowhite;
 }
 .ship {

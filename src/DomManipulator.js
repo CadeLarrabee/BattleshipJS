@@ -63,11 +63,21 @@ class DomManip {
 
     shipWrapper.addEventListener("click", () => {
       this.selectedShip = ship;
-      shipWrapper.classList.add("selected");
+      const allNav = document.querySelectorAll(".shipWrapper");
+      //todo use the navShipSelected class to
+      //remove the tab from the nav bar later
+      allNav.forEach((nav) => nav.classList.remove("navShipSelected"));
+      shipWrapper.classList.add("navShipSelected");
     });
 
     shipWrapper.appendChild(shipTitle);
     navWrapper.appendChild(shipWrapper);
+  }
+  removeShipFromNavPanel() {
+    //Remove all ships that have .navShipSelected since we only ever want one.
+    const NavToRemove = document.querySelectorAll(".navShipSelected");
+    NavToRemove.forEach((nav) => nav.remove("navShipSelected"));
+    this.handleShipDeselect();
   }
   generateStateWrapper(mainWrapper, gameState) {
     const currentStateWrapper = document.createElement("div");
@@ -128,6 +138,9 @@ class DomManip {
         square.addEventListener("click", (event) => {
           this.HandleTileClick(event, player, gameState);
         });
+        square.addEventListener("mouseover", (event) => {
+          this.HandleTileHover(event);
+        });
         column.appendChild(square);
       });
       // Add additional attributes or content to the square if needed
@@ -144,8 +157,14 @@ class DomManip {
     const coordinateArr = [[parseInt(row), parseInt(col)]];
 
     switch (gameState.state) {
+      //Update this to place a ship in all tiles.
       case 0:
-        player.gameBoard.addShipToBoard("", 1, coordinateArr);
+        player.gameBoard.addShipToBoard(
+          this.selectedShip.name,
+          this.selectedShip.length,
+          coordinateArr
+        );
+        this.removeShipFromNavPanel();
         tile.classList.add("ship");
         break;
       case 1:
@@ -158,6 +177,36 @@ class DomManip {
         StateWrapper.textContent = "Player Two's turn";
         break;
     }
+  }
+  HandleTileHover(event) {
+    if (this.selectedShip) {
+      const tile = event.target;
+      const row = parseInt(tile.dataset.row);
+      const col = parseInt(tile.dataset.col);
+      const shipLength = this.selectedShip.length;
+      console.log(event);
+
+      this.clearAllTileHover();
+
+      // Calculate which tiles should be highlighted
+      for (let i = 0; i < shipLength; i++) {
+        const hoverTile = document.querySelector(
+          `.tile[data-row="${row}"][data-col="${col + i}"]`
+        );
+        if (hoverTile) {
+          hoverTile.classList.add("hover");
+        }
+      }
+    }
+  }
+  handleShipDeselect() {
+    this.clearAllTileHover();
+    this.selectedShip = undefined;
+  }
+  clearAllTileHover() {
+    // Clear previous hover states
+    const allTiles = document.querySelectorAll(".tile");
+    allTiles.forEach((tile) => tile.classList.remove("hover"));
   }
 }
 
