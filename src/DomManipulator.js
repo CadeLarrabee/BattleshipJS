@@ -4,6 +4,8 @@ import GameState from "./GameState.js";
 class DomManip {
   constructor() {
     this.selectedTiles = [];
+    this.lastHoveredTile = null;
+
     this.shipTypes = [
       { name: "Carrier", length: 5 },
       { name: "Battleship", length: 4 },
@@ -11,7 +13,10 @@ class DomManip {
       { name: "Submarine", length: 3 },
       { name: "Destroyer", length: 2 },
     ];
+
     this.selectedShip = undefined;
+    this.rotation = "horizontal";
+
     this.players = [];
   }
   onEntry() {
@@ -27,6 +32,9 @@ class DomManip {
     this.players.push(
       this.generatePlayer("Human", 2, playerBoardWrapper, gameState)
     );
+
+    //add listener for rotation
+    document.addEventListener("keydown", (event) => this.handleKeyDown(event));
   }
   generateMainWrapper() {
     const mainProjPanelWrapper = document.createElement("div");
@@ -64,8 +72,8 @@ class DomManip {
     shipWrapper.addEventListener("click", () => {
       this.selectedShip = ship;
       const allNav = document.querySelectorAll(".shipWrapper");
-      //todo use the navShipSelected class to
-      //remove the tab from the nav bar later
+
+      //Deselect other ship navs
       allNav.forEach((nav) => nav.classList.remove("navShipSelected"));
       shipWrapper.classList.add("navShipSelected");
     });
@@ -136,10 +144,10 @@ class DomManip {
         square.dataset.col = colIndex;
         square.dataset.row = rowIndex;
         square.addEventListener("click", (event) => {
-          this.HandleTileClick(event, player, gameState);
+          this.handleTileClick(event, player, gameState);
         });
         square.addEventListener("mouseover", (event) => {
-          this.HandleTileHover(event);
+          this.handleTileHover(event);
         });
         column.appendChild(square);
       });
@@ -150,7 +158,30 @@ class DomManip {
     return boardWrapper;
   }
 
-  HandleTileClick(event, player, gameState) {
+  //------------------------------------------
+  //--Handlers
+  //------------------------------------------
+
+  handleKeyDown(event) {
+    if (this.selectedShip) {
+      if (event.key === "r" || event.key === "R") {
+        this.changeRotation();
+        if (this.lastHoveredTile) {
+          this.handleTileHover({ target: this.lastHoveredTile });
+        }
+      }
+    }
+  }
+
+  changeRotation() {
+    if (this.rotation == "vertical") {
+      this.rotation = "horizontal";
+    } else {
+      this.rotation = "vertical";
+    }
+  }
+
+  handleTileClick(event, player, gameState) {
     const tile = event.target;
     const row = tile.dataset.row;
     const col = tile.dataset.col;
@@ -178,23 +209,35 @@ class DomManip {
         break;
     }
   }
-  HandleTileHover(event) {
-    if (this.selectedShip) {
+  handleTileHover(event) {
+    const ship = this.selectedShip;
+    if (ship) {
       const tile = event.target;
       const row = parseInt(tile.dataset.row);
       const col = parseInt(tile.dataset.col);
-      const shipLength = this.selectedShip.length;
       console.log(event);
 
+      this.lastHoveredTile = tile;
       this.clearAllTileHover();
 
       // Calculate which tiles should be highlighted
-      for (let i = 0; i < shipLength; i++) {
-        const hoverTile = document.querySelector(
-          `.tile[data-row="${row}"][data-col="${col + i}"]`
-        );
-        if (hoverTile) {
-          hoverTile.classList.add("hover");
+      if (this.rotation == "horizontal") {
+        for (let i = 0; i < ship.length; i++) {
+          const hoverTile = document.querySelector(
+            `.tile[data-row="${row}"][data-col="${col + i}"]`
+          );
+          if (hoverTile) {
+            hoverTile.classList.add("hover");
+          }
+        }
+      } else {
+        for (let i = 0; i < ship.length; i++) {
+          const hoverTile = document.querySelector(
+            `.tile[data-row="${row + i}"][data-col="${col}"]`
+          );
+          if (hoverTile) {
+            hoverTile.classList.add("hover");
+          }
         }
       }
     }
