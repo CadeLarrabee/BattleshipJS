@@ -1,5 +1,6 @@
 import Player from "./Player.js";
 import GameState from "./GameState.js";
+import gameBoard from "./GameBoard.js";
 
 class DomManip {
   constructor() {
@@ -23,8 +24,10 @@ class DomManip {
     const mainWrapper = this.generateMainWrapper();
     const navWrapper = this.generateNavWrapper(mainWrapper);
     const playerBoardWrapper = this.generatePlayerBoardWrapper(mainWrapper);
+
     let gameState = new GameState();
     this.generateStateWrapper(playerBoardWrapper, gameState);
+
     this.players.push(
       this.generatePlayer("Human", 1, playerBoardWrapper, gameState)
     );
@@ -183,20 +186,33 @@ class DomManip {
 
   handleTileClick(event, player, gameState) {
     const tile = event.target;
-    const row = tile.dataset.row;
-    const col = tile.dataset.col;
-    const coordinateArr = [[parseInt(row), parseInt(col)]];
+    const row = parseInt(tile.dataset.row);
+    const col = parseInt(tile.dataset.col);
+    const shipTiles = this.getShipPlacement(row, col);
+
+    this.rotation = "horizontal";
+
+    //Handle clicking on the tile in different stages of the game.
 
     switch (gameState.state) {
-      //Update this to place a ship in all tiles.
       case 0:
-        player.gameBoard.addShipToBoard(
-          this.selectedShip.name,
-          this.selectedShip.length,
-          coordinateArr
-        );
-        this.removeShipFromNavPanel();
-        tile.classList.add("ship");
+        if (this.selectedShip && shipTiles) {
+          player.gameBoard.addShipToBoard(
+            this.selectedShip.name,
+            this.selectedShip.length,
+            shipTiles
+          );
+          this.removeShipFromNavPanel();
+
+          shipTiles.forEach(([r, c]) => {
+            const tileToMark = document.querySelector(
+              `.tile[data-row="${r}"][data-col="${c}"]`
+            );
+            if (tileToMark) {
+              tileToMark.classList.add("ship");
+            }
+          });
+        }
         break;
       case 1:
         StateWrapper.textContent = "Player Two Setup";
@@ -221,27 +237,40 @@ class DomManip {
       this.clearAllTileHover();
 
       // Calculate which tiles should be highlighted
-      if (this.rotation == "horizontal") {
-        for (let i = 0; i < ship.length; i++) {
+      const shipTiles = this.getShipPlacement(row, col);
+
+      if (shipTiles) {
+        shipTiles.forEach(([r, c]) => {
           const hoverTile = document.querySelector(
-            `.tile[data-row="${row}"][data-col="${col + i}"]`
+            `.tile[data-row="${r}"][data-col="${c}"]`
           );
           if (hoverTile) {
             hoverTile.classList.add("hover");
           }
-        }
-      } else {
-        for (let i = 0; i < ship.length; i++) {
-          const hoverTile = document.querySelector(
-            `.tile[data-row="${row + i}"][data-col="${col}"]`
-          );
-          if (hoverTile) {
-            hoverTile.classList.add("hover");
-          }
-        }
+        });
       }
     }
   }
+
+  getShipPlacement(row, col) {
+    //given a row/col, return the tiles we'd need to place the ship
+    const ship = this.selectedShip;
+    if (!ship) return null;
+
+    const shipTiles = [];
+    if (this.rotation == "horizontal") {
+      for (let i = 0; i < ship.length; i++) {
+        shipTiles.push([row, col + i]);
+      }
+    } else {
+      for (let i = 0; i < ship.length; i++) {
+        shipTiles.push([row + i, col]);
+      }
+    }
+
+    return shipTiles;
+  }
+
   handleShipDeselect() {
     this.clearAllTileHover();
     this.selectedShip = undefined;

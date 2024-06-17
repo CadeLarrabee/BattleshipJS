@@ -3,13 +3,13 @@ class Tile {
     this.x = x;
     this.y = y;
     this.isHit = false;
-    this.hasShip = false;
+    this.Ship = undefined;
   }
-  setShip(bool) {
-    this.hasShip = bool;
+  setShip(ship) {
+    this.Ship = ship;
   }
   getShip() {
-    return this.hasShip;
+    return this.Ship;
   }
   setHit(bool) {
     this.isHit = bool;

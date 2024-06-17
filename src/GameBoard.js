@@ -19,12 +19,34 @@ class gameBoard {
   }
   addShipToBoard(type, length, coordinateArr) {
     const ship = new Ship(type, length, coordinateArr);
-    this.ships.push(ship);
+
+    // Check each coordinate for errors
+    for (let i = 0; i < coordinateArr.length; i++) {
+      const coordinate = coordinateArr[i];
+      const row = coordinate[0];
+      const col = coordinate[1];
+
+      if (row < 0 || row >= 10 || col < 0 || col >= 10) {
+        return "Error: Coordinate out of board bounds";
+      }
+
+      if (this.board[row][col].hasShip()) {
+        return "Error: Another ship is already placed at this coordinate";
+      }
+    }
+
+    // If all coordinates are valid, place the ship on the board
     coordinateArr.forEach((coordinate) => {
-      this.board[coordinate[0]][coordinate[1]].setShip(true);
+      const row = coordinate[0];
+      const col = coordinate[1];
+      this.board[row][col].setShip(ship);
     });
+
+    this.ships.push(ship);
+
     return ship;
   }
+
   removeShipFromBoard(ship) {
     //removes a ship from the board and returns true if there are no ships left
     const coordinateArr = ship.getCoordinates();
