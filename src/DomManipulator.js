@@ -42,29 +42,34 @@ class DomManip {
     //add listener for rotation
     document.addEventListener("keydown", (event) => this.handleKeyDown(event));
   }
+
   generateMainWrapper() {
     const mainProjPanelWrapper = document.createElement("div");
     mainProjPanelWrapper.classList.add("mainWrapper");
     document.body.appendChild(mainProjPanelWrapper);
     return mainProjPanelWrapper;
   }
+
   generatePlayerBoardWrapper(mainWrapper) {
     const playerBoardWrapper = document.createElement("div");
     playerBoardWrapper.classList.add("playerBoardWrapper");
     mainWrapper.appendChild(playerBoardWrapper);
     return playerBoardWrapper;
   }
+
   generateNavWrapper(mainWrapper) {
     const navWrapper = document.createElement("div");
     navWrapper.classList.add("navWrapper");
     mainWrapper.appendChild(navWrapper);
     return navWrapper;
   }
+
   generateShipSetupPanel(navWrapper) {
     this.shipTypes.forEach((ship) => {
       this.addShipToNavPanel(ship, navWrapper);
     });
   }
+
   generateScreenBlocker(text) {
     const screenBlocker = document.createElement("div");
     screenBlocker.classList.add("screenBlocker");
@@ -118,18 +123,21 @@ class DomManip {
     shipWrapper.appendChild(shipTitle);
     navWrapper.appendChild(shipWrapper);
   }
+
   removeShipFromNavPanel() {
     //Remove all ships that have .navShipSelected since we only ever want one.
     const NavToRemove = document.querySelectorAll(".navShipSelected");
     NavToRemove.forEach((nav) => nav.remove("navShipSelected"));
     this.handleShipDeselect();
   }
+
   generateStateWrapper(mainWrapper) {
     const currentStateWrapper = document.createElement("div");
     currentStateWrapper.classList.add("stateWrapper");
     mainWrapper.appendChild(currentStateWrapper);
     this.updateStateTextContent();
   }
+
   updateStateTextContent() {
     const stateWrapper = document.querySelector(".stateWrapper");
     switch (this.gameState.state) {
@@ -147,6 +155,7 @@ class DomManip {
         break;
     }
   }
+
   generatePlayer(type, playerId, mainWrapper) {
     const playerPanel = document.createElement("div");
     const playerTextPanel = document.createElement("div");
@@ -168,6 +177,7 @@ class DomManip {
     playerBoardPanel.appendChild(boardTileWrapper);
     return player;
   }
+
   generateBoard(player) {
     const boardWrapper = document.createElement("div");
     boardWrapper.classList.add("boardWrapper");
@@ -242,6 +252,7 @@ class DomManip {
 
     switch (this.gameState.state) {
       case 0:
+      case 1:
         if (this.selectedShip && shipTiles) {
           try {
             player.gameBoard.addShipToBoard(
@@ -261,7 +272,7 @@ class DomManip {
               }
             });
             //Should we move on from setup?
-            if (this.gameState.ShouldStateAdvance()) {
+            if (this.ShouldStateAdvance()) {
               this.handleStateChange();
             }
           } catch (error) {
@@ -270,14 +281,9 @@ class DomManip {
           }
         }
         break;
-      case 1:
-        StateWrapper.textContent = "Player Two Setup";
-        break;
       case 2:
-        StateWrapper.textContent = "Player One's turn";
         break;
       case 3:
-        StateWrapper.textContent = "Player Two's turn";
         break;
     }
   }
@@ -328,36 +334,50 @@ class DomManip {
   }
 
   handleStateChange() {
-    switch (this.gameState) {
+    switch (this.gameState.getState()) {
       case 0:
-        this.currentPlayerId = this.players[0].playerId;
-        generateScreenBlocker("Player 2's Setup");
-        this.gameState.advanceState();
+        this.generateScreenBlocker("Player 2's Setup");
+        this.generateBoardBlocker(players[0]);
+
+        this.currentPlayerId = this.players[1].playerId;
+
         this.generateShipSetupPanel(
           document.querySelector(".navWrapper"),
           this.players[1]
         );
-        generateBoardBlocker(players[0]);
-        updateStateTextContent();
+
+        this.gameState.advanceState();
+        this.updateStateTextContent();
         break;
       case 1:
-        this.currentPlayerId = this.players[1].playerId;
-        generateScreenBlocker("Player 1's Turn");
+        this.generateScreenBlocker("Player 1's Turn");
+        this.generateBoardBlocker(players[1]);
+
+        this.currentPlayerId = this.players[0].playerId;
+
         this.gameState.advanceState();
-        updateStateTextContent();
-        generateBoardBlocker(players[1]);
+        this.updateStateTextContent();
+
         break;
       case 2:
+        this.generateScreenBlocker("Player 2's Turn");
+
         this.currentPlayerId = this.players[0].playerId;
-        generateScreenBlocker("Player 2's Turn");
+        this.players[0].setShot(false);
+
         this.gameState.advanceState();
         updateStateTextContent();
+
         generateBoardBlocker(players[0]);
+
         break;
       case 3:
         this.currentPlayerId = this.players[1].playerId;
         generateScreenBlocker("Player 1's Turn");
+
         this.gameState.advanceState();
+        this.players[1].setShot(false);
+
         updateStateTextContent();
         generateBoardBlocker(players[1]);
         break;
@@ -392,7 +412,7 @@ class DomManip {
     switch (this.gameState.state) {
       case 0:
       case 1:
-        if (!allNav) {
+        if (allNav.length == 0) {
           return true;
         }
         return false;

@@ -5,6 +5,7 @@ class Player {
     this.type = type;
     this.playerId = playerId;
     this.gameBoard = new gameBoard();
+    this.hasShot = null;
   }
 }
 
