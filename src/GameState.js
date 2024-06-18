@@ -19,6 +19,7 @@ class GameState {
   getState() {
     return this.state;
   }
+  ShouldStateAdvance() {}
   advanceState() {
     this.state += 1;
     if (this.state > 3) this.state = 2;

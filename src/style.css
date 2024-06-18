@@ -78,12 +78,35 @@
 .hover {
   background-color: white;
 }
-.hidden {
-  background-color: black;
-}
 .navShipSelected {
   background-color: navajowhite;
 }
 .ship {
   background-color: blue;
+}
+.screenBlocker {
+  height: 100%;
+  width: 100vw;
+  color: purple;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.screenBlockerWrapper {
+  height: 500px;
+  width: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+.screenBlockerButton {
+  width: 100px;
+  height: 50px;
+  color: orange;
+  font-size: 14px;
+}
+.hidden {
+  background-color: black;
 }

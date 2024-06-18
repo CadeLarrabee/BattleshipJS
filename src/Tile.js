@@ -3,7 +3,7 @@ class Tile {
     this.x = x;
     this.y = y;
     this.isHit = false;
-    this.Ship = undefined;
+    this.Ship = null;
   }
   setShip(ship) {
     this.Ship = ship;
