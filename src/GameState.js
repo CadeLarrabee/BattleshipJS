@@ -11,7 +11,6 @@ class GameState {
   //
   constructor(state, currentPlayer) {
     this.state = state ?? 0;
-    this.currentPlayer = currentPlayer ?? 0;
   }
   setState(state) {
     this.state = state;
@@ -19,7 +18,6 @@ class GameState {
   getState() {
     return this.state;
   }
-  ShouldStateAdvance() {}
   advanceState() {
     this.state += 1;
     if (this.state > 3) this.state = 2;

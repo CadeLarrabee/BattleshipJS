@@ -22,6 +22,10 @@ class DomManip {
     this.players = [];
     this.currentPlayer = null;
   }
+
+  //-------------------------------------------------
+  //    Navigation Component generators
+  //-------------------------------------------------
   onEntry() {
     const mainWrapper = this.generateMainWrapper();
     const navWrapper = this.generateNavWrapper(mainWrapper);
@@ -256,7 +260,10 @@ class DomManip {
                 tileToMark.classList.add("ship");
               }
             });
-            this.gameState.ShouldStateAdvance();
+            //Should we move on from setup?
+            if (this.gameState.ShouldStateAdvance()) {
+              this.handleStateChange();
+            }
           } catch (error) {
             console.error(error.message);
             alert(error.message);
@@ -374,6 +381,33 @@ class DomManip {
     // Clear previous hover states
     const allTiles = document.querySelectorAll(".tile");
     allTiles.forEach((tile) => tile.classList.remove("hover"));
+  }
+  //
+  //
+  //
+
+  ShouldStateAdvance() {
+    //Returns true or false if we should advance the state
+    const allNav = document.querySelectorAll(".shipWrapper");
+    switch (this.gameState.state) {
+      case 0:
+      case 1:
+        if (!allNav) {
+          return true;
+        }
+        return false;
+      //Deselect other ship navs
+      case 2:
+        if (players[0].hasShot == true) {
+          return true;
+        }
+        return false;
+      case 3:
+        if (players[1].hasShot == true) {
+          return true;
+        }
+        return false;
+    }
   }
 }
 
