@@ -41,6 +41,8 @@ class DomManip {
 
     //add listener for rotation
     document.addEventListener("keydown", (event) => this.handleKeyDown(event));
+    this.generateScreenBlocker("Player 1's Setup");
+    this.generateBoardBlocker(this.players[1]);
   }
 
   generateMainWrapper() {
@@ -250,7 +252,7 @@ class DomManip {
 
     //Handle clicking on the tile in different stages of the game.
 
-    switch (this.gameState.state) {
+    switch (this.gameState.getState()) {
       case 0:
       case 1:
         if (this.selectedShip && shipTiles) {
@@ -265,7 +267,7 @@ class DomManip {
 
             shipTiles.forEach(([r, c]) => {
               const tileToMark = document.querySelector(
-                `.tile[data-row="${r}"][data-col="${c}"]`
+                `.tile[data-row="${r}"][data-col="${c}"][data-player-id="${playerId}"]`
               );
               if (tileToMark) {
                 tileToMark.classList.add("ship");
@@ -312,6 +314,24 @@ class DomManip {
         });
       }
     }
+
+    //check if we're clicking on an enemy board to fire during gameplay loop
+    if (
+      !ship &&
+      playerId !== this.currentPlayer &&
+      [2, 3].includes(this.gameState.getState())
+    ) {
+      this.lastHoveredTile = tile;
+      this.clearAllTileHover();
+
+      // Calculate which tiles should be highlighted
+      const hoverTile = document.querySelector(
+        `.tile[data-row="${row}"][data-col="${col}"][data-player-id="${playerId}"]`
+      );
+      if (hoverTile) {
+        hoverTile.classList.add("enemyHover");
+      }
+    }
   }
 
   getShipPlacement(row, col) {
@@ -337,9 +357,10 @@ class DomManip {
     switch (this.gameState.getState()) {
       case 0:
         this.generateScreenBlocker("Player 2's Setup");
-        this.generateBoardBlocker(players[0]);
+        this.generateBoardBlocker(this.players[0]);
+        this.removeBoardBlocker(this.players[1]);
 
-        this.currentPlayerId = this.players[1].playerId;
+        this.currentPlayer = this.players[1].playerId;
 
         this.generateShipSetupPanel(
           document.querySelector(".navWrapper"),
@@ -351,9 +372,10 @@ class DomManip {
         break;
       case 1:
         this.generateScreenBlocker("Player 1's Turn");
-        this.generateBoardBlocker(players[1]);
+        this.generateBoardBlocker(this.players[1]);
+        this.removeBoardBlocker(this.players[0]);
 
-        this.currentPlayerId = this.players[0].playerId;
+        this.currentPlayer = this.players[0].playerId;
 
         this.gameState.advanceState();
         this.updateStateTextContent();
@@ -362,34 +384,57 @@ class DomManip {
       case 2:
         this.generateScreenBlocker("Player 2's Turn");
 
-        this.currentPlayerId = this.players[0].playerId;
+        this.currentPlayer = this.players[1].playerId;
         this.players[0].setShot(false);
 
         this.gameState.advanceState();
-        updateStateTextContent();
+        this.updateStateTextContent();
 
-        generateBoardBlocker(players[0]);
+        this.generateBoardBlocker(this.players[0]);
+        this.removeBoardBlocker(this.players[1]);
 
         break;
       case 3:
-        this.currentPlayerId = this.players[1].playerId;
-        generateScreenBlocker("Player 1's Turn");
+        this.generateScreenBlocker("Player 1's Turn");
 
-        this.gameState.advanceState();
+        this.currentPlayer = this.players[0].playerId;
         this.players[1].setShot(false);
 
-        updateStateTextContent();
-        generateBoardBlocker(players[1]);
+        this.gameState.advanceState();
+
+        this.updateStateTextContent();
+        this.generateBoardBlocker(this.players[1]);
+        this.removeBoardBlocker(this.players[0]);
         break;
     }
   }
 
   generateBoardBlocker(player) {
-    //Hide the player who is not in focuses board.
-    player.gameBoard.board.forEach((section) => {
-      section.forEach((tile) => {
-        tile.classList.add("hidden");
+    // Hide the player who is not in focus by adding "hidden" class to their board tiles
+    player.gameBoard.board.forEach((section, colIndex) => {
+      section.forEach((tile, rowIndex) => {
+        const tileElement = document.querySelector(
+          `.tile[data-player-id="${player.playerId}"][data-col="${colIndex}"][data-row="${rowIndex}"]`
+        );
+        if (tileElement) {
+          tileElement.classList.add("hidden");
+        }
       });
+    });
+  }
+
+  removeBoardBlocker(player) {
+    // Unhide the player who is now in focus by removing "hidden" class from their board tiles
+    player.gameBoard.board.forEach((section, colIndex) => {
+      section.forEach((tile, rowIndex) => {
+        const tileElement = document.querySelector(
+          `.tile[data-player-id="${player.playerId}"][data-col="${colIndex}"][data-row="${rowIndex}"]`
+        );
+        if (tileElement) {
+          tileElement.classList.remove("hidden");
+        }
+      });
+      9;
     });
   }
 
@@ -401,6 +446,7 @@ class DomManip {
     // Clear previous hover states
     const allTiles = document.querySelectorAll(".tile");
     allTiles.forEach((tile) => tile.classList.remove("hover"));
+    allTiles.forEach((tile) => tile.classList.remove("enemyHover"));
   }
   //
   //
