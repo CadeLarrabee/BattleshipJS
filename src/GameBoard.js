@@ -5,7 +5,6 @@ class gameBoard {
   constructor() {
     this.board = this.setupNewBoard(10, 10);
     this.ships = [];
-    this.Shots = [];
   }
   setupNewBoard(length, height) {
     let board = [];
@@ -48,7 +47,7 @@ class gameBoard {
     return ship;
   }
 
-  removeShipFromBoard(ship) {
+  removeShipFromBoard(ship, onGameEnd) {
     //removes a ship from the board and returns true if there are no ships left
     const coordinateArr = ship.getCoordinates();
     coordinateArr.forEach((coordinate) => {
@@ -58,25 +57,26 @@ class gameBoard {
     if (index !== -1) {
       this.ships.splice(index, 1);
     }
-    return this.allShipsSunk();
+    this.allShipsSunk(onGameEnd);
   }
-  allShipsSunk() {
-    if (this.ships == []) {
+  allShipsSunk(onGameEnd) {
+    if (this.ships.length == 0) {
       console.log("All ships sunk on gameboard: ", this.gameBoard);
-      return true;
-    } else {
-      return false;
+      onGameEnd();
     }
   }
-  receiveAttack(coordinate) {
+  receiveAttack(coordinate, onGameEnd) {
+    //Returns true if hit, or if the hit ends the game, call onGameEnd to begin end-game
     const ship = this.board[coordinate[0]][coordinate[1]].getShip();
     if (ship) {
       ship.addHit();
       if (ship.isSunk()) {
-        this.removeShipFromBoard(ship);
+        if (this.removeShipFromBoard(ship, onGameEnd));
       }
+      return true;
+    } else {
+      return false;
     }
-    this.Shots.push(coordinate);
   }
 }
 

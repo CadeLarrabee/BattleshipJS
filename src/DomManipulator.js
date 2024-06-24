@@ -72,7 +72,41 @@ class DomManip {
     });
   }
 
-  generateScreenBlocker(text) {
+  generateFeedbackPanel(type, primaryText, secondaryText = null) {
+    const panel = document.createElement("div");
+    panel.classList.add(
+      type === "player" ? "playerFeedbackPanel" : "screenBlocker"
+    );
+
+    const panelWrapper = document.createElement("div");
+    panelWrapper.classList.add(
+      type === "player" ? "playerFeedbackPanelWrapper" : "screenBlockerWrapper"
+    );
+
+    const panelText = document.createElement("div");
+    panelText.classList.add(
+      type === "player" ? "playerFeedbackText" : "screenBlockerText"
+    );
+    panelText.textContent = primaryText;
+
+    const panelButton = this.generateCloseButton();
+
+    document.body.appendChild(panel);
+    panel.appendChild(panelWrapper);
+    panelWrapper.appendChild(panelText);
+
+    if (secondaryText) {
+      const panelSecondaryText = document.createElement("div");
+      panelSecondaryText.classList.add("screenBlockerText");
+      panelSecondaryText.textContent = secondaryText;
+      panelWrapper.appendChild(panelSecondaryText);
+    }
+
+    panelWrapper.appendChild(panelButton);
+    return panel;
+  }
+
+  generateScreenBlocker(text, shipHit = null) {
     const screenBlocker = document.createElement("div");
     screenBlocker.classList.add("screenBlocker");
 
@@ -83,17 +117,22 @@ class DomManip {
     screenBlockerText.classList.add("screenBlockerText");
     screenBlockerText.textContent = text;
 
+    if (shipHit) {
+      const shipHit = document.createElement("div");
+      shipHit.classList.add("hitText");
+      if ((shipHit = true)) {
+        shipHit.textContent = "Hit!!!";
+      } else {
+        shipHit.textContent = "You Missed!";
+      }
+      screenBlockerWrapper.appendChild(shipHit);
+    }
+
     const screenBlockerSecondaryText = document.createElement("div");
     screenBlockerSecondaryText.classList.add("screenBlockerText");
     screenBlockerSecondaryText.textContent = "Ready next player";
 
-    const screenBlockerButton = document.createElement("button");
-    screenBlockerButton.classList.add("screenBlockerButton");
-    screenBlockerButton.textContent = "Continue";
-
-    screenBlockerButton.addEventListener("click", () => {
-      screenBlocker.remove();
-    });
+    const screenBlockerButton = this.generateCloseButton();
 
     document.body.appendChild(screenBlocker);
     screenBlocker.appendChild(screenBlockerWrapper);
@@ -211,6 +250,66 @@ class DomManip {
 
     return boardWrapper;
   }
+  generateBoardBlocker(player) {
+    // Hide the player who is not in focus by adding "hidden" class to their board tiles
+    player.gameBoard.board.forEach((section, colIndex) => {
+      section.forEach((tile, rowIndex) => {
+        const tileElement = document.querySelector(
+          `.tile[data-player-id="${player.playerId}"][data-col="${colIndex}"][data-row="${rowIndex}"]`
+        );
+        if (tileElement) {
+          tileElement.classList.add("hidden");
+        }
+      });
+    });
+  }
+
+  removeBoardBlocker(player) {
+    // Unhide the player who is now in focus by removing "hidden" class from their board tiles
+    player.gameBoard.board.forEach((section, colIndex) => {
+      section.forEach((tile, rowIndex) => {
+        const tileElement = document.querySelector(
+          `.tile[data-player-id="${player.playerId}"][data-col="${colIndex}"][data-row="${rowIndex}"]`
+        );
+        if (tileElement) {
+          tileElement.classList.remove("hidden");
+        }
+      });
+      9;
+    });
+  }
+
+  generatePlayerFeedbackPanel(text) {
+    //Gives the player feedback on whether they hit or miss.
+    const playerFeedback = document.createElement("div");
+    playerFeedback.classList.add("playerFeedbackPanel");
+
+    const playerFeedbackWrapper = document.createElement("div");
+    playerFeedbackWrapper.classList.add("playerFeedbackPanelWrapper");
+
+    const playerFeedbackText = document.createElement("div");
+    playerFeedbackText.classList.add("playerFeedbackText");
+    playerFeedbackText.textContent = text;
+
+    const playerFeedbackButton = this.generateCloseButton();
+
+    document.body.appendChild(playerFeedback);
+    playerFeedback.appendChild(playerFeedbackWrapper);
+    playerFeedbackWrapper.appendChild(playerFeedbackText);
+    playerFeedbackWrapper.appendChild(playerFeedbackButton);
+    return playerFeedback;
+  }
+
+  generateCloseButton() {
+    const closeButton = document.createElement("button");
+    closeButton.classList.add("screenBlockerButton");
+    closeButton.textContent = "Continue";
+
+    closeButton.addEventListener("click", () => {
+      closeButton.remove();
+    });
+    return closeButton;
+  }
 
   //------------------------------------------
   //--Handlers
@@ -241,20 +340,17 @@ class DomManip {
     const col = parseInt(tile.dataset.col);
 
     const playerId = parseInt(tile.dataset.playerId);
-    const shipTiles = this.getShipPlacement(row, col);
-
-    this.rotation = "horizontal";
-
-    if (playerId !== this.currentPlayer) {
-      // If the tile does not belong to the current player, ignore the click
-      return;
-    }
 
     //Handle clicking on the tile in different stages of the game.
 
     switch (this.gameState.getState()) {
       case 0:
       case 1:
+        if (playerId !== this.currentPlayer) {
+          // If the tile does not belong to the current player, ignore the click
+          return;
+        }
+        const shipTiles = this.getShipPlacement(row, col);
         if (this.selectedShip && shipTiles) {
           try {
             player.gameBoard.addShipToBoard(
@@ -277,6 +373,7 @@ class DomManip {
             if (this.ShouldStateAdvance()) {
               this.handleStateChange();
             }
+            this.rotation = "horizontal";
           } catch (error) {
             console.error(error.message);
             alert(error.message);
@@ -284,8 +381,30 @@ class DomManip {
         }
         break;
       case 2:
-        break;
       case 3:
+        let shipHit = false;
+        if (playerId !== this.currentPlayer) {
+          const tileToMark = document.querySelector(
+            `.tile[data-row="${row}"][data-col="${col}"][data-player-id="${playerId}"]`
+          );
+
+          if (tileToMark) {
+            if (
+              this.players[playerId - 1].gameBoard.receiveAttack(
+                [row, col],
+                this.OnGameEnd
+              )
+            ) {
+              tileToMark.classList.add("shipHit");
+              shipHit = true;
+            } else {
+              tileToMark.classList.add("miss");
+            }
+
+            this.handleStateChange(shipHit);
+          }
+        }
+        this.rotation = "horizontal";
         break;
     }
   }
@@ -353,7 +472,7 @@ class DomManip {
     return shipTiles;
   }
 
-  handleStateChange() {
+  handleStateChange(shipHit = null) {
     switch (this.gameState.getState()) {
       case 0:
         this.generateScreenBlocker("Player 2's Setup");
@@ -382,10 +501,9 @@ class DomManip {
 
         break;
       case 2:
-        this.generateScreenBlocker("Player 2's Turn");
+        this.generateScreenBlocker("Player 2's Turn", shipHit);
 
         this.currentPlayer = this.players[1].playerId;
-        this.players[0].setShot(false);
 
         this.gameState.advanceState();
         this.updateStateTextContent();
@@ -395,10 +513,9 @@ class DomManip {
 
         break;
       case 3:
-        this.generateScreenBlocker("Player 1's Turn");
+        this.generateScreenBlocker("Player 1's Turn", shipHit);
 
         this.currentPlayer = this.players[0].playerId;
-        this.players[1].setShot(false);
 
         this.gameState.advanceState();
 
@@ -407,35 +524,6 @@ class DomManip {
         this.removeBoardBlocker(this.players[0]);
         break;
     }
-  }
-
-  generateBoardBlocker(player) {
-    // Hide the player who is not in focus by adding "hidden" class to their board tiles
-    player.gameBoard.board.forEach((section, colIndex) => {
-      section.forEach((tile, rowIndex) => {
-        const tileElement = document.querySelector(
-          `.tile[data-player-id="${player.playerId}"][data-col="${colIndex}"][data-row="${rowIndex}"]`
-        );
-        if (tileElement) {
-          tileElement.classList.add("hidden");
-        }
-      });
-    });
-  }
-
-  removeBoardBlocker(player) {
-    // Unhide the player who is now in focus by removing "hidden" class from their board tiles
-    player.gameBoard.board.forEach((section, colIndex) => {
-      section.forEach((tile, rowIndex) => {
-        const tileElement = document.querySelector(
-          `.tile[data-player-id="${player.playerId}"][data-col="${colIndex}"][data-row="${rowIndex}"]`
-        );
-        if (tileElement) {
-          tileElement.classList.remove("hidden");
-        }
-      });
-      9;
-    });
   }
 
   handleShipDeselect() {
@@ -474,6 +562,10 @@ class DomManip {
         }
         return false;
     }
+  }
+  OnGameEnd() {
+    this.generateScreenBlocker("Game End " + this.currentPlayer + " WINS!");
+    return this.currentPlayer;
   }
 }
 

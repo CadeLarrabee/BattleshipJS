@@ -86,6 +86,11 @@
   justify-content: center;
   align-items: center;
 }
+.hitText {
+  font-size: 48px;
+  width: 250px;
+  height: 56px;
+}
 .screenBlockerWrapper {
   height: 500px;
   width: 500px;
@@ -116,4 +121,10 @@
 }
 .tile.enemyHover {
   background-color: green;
+}
+.tile.shipHit {
+  background-color: yellow;
+}
+.tile.miss {
+  background-color: rgb(0, 183, 255);
 }
