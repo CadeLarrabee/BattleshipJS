@@ -72,41 +72,7 @@ class DomManip {
     });
   }
 
-  generateFeedbackPanel(type, primaryText, secondaryText = null) {
-    const panel = document.createElement("div");
-    panel.classList.add(
-      type === "player" ? "playerFeedbackPanel" : "screenBlocker"
-    );
-
-    const panelWrapper = document.createElement("div");
-    panelWrapper.classList.add(
-      type === "player" ? "playerFeedbackPanelWrapper" : "screenBlockerWrapper"
-    );
-
-    const panelText = document.createElement("div");
-    panelText.classList.add(
-      type === "player" ? "playerFeedbackText" : "screenBlockerText"
-    );
-    panelText.textContent = primaryText;
-
-    const panelButton = this.generateCloseButton();
-
-    document.body.appendChild(panel);
-    panel.appendChild(panelWrapper);
-    panelWrapper.appendChild(panelText);
-
-    if (secondaryText) {
-      const panelSecondaryText = document.createElement("div");
-      panelSecondaryText.classList.add("screenBlockerText");
-      panelSecondaryText.textContent = secondaryText;
-      panelWrapper.appendChild(panelSecondaryText);
-    }
-
-    panelWrapper.appendChild(panelButton);
-    return panel;
-  }
-
-  generateScreenBlocker(text, shipHit = null) {
+  generateScreenBlocker(text, shipHit = null, shipSunk = false) {
     const screenBlocker = document.createElement("div");
     screenBlocker.classList.add("screenBlocker");
 
@@ -117,15 +83,16 @@ class DomManip {
     screenBlockerText.classList.add("screenBlockerText");
     screenBlockerText.textContent = text;
 
-    if (shipHit) {
-      const shipHit = document.createElement("div");
-      shipHit.classList.add("hitText");
-      if ((shipHit = true)) {
-        shipHit.textContent = "Hit!!!";
-      } else {
-        shipHit.textContent = "You Missed!";
-      }
-      screenBlockerWrapper.appendChild(shipHit);
+    if (shipSunk) {
+      const shipSunkText = document.createElement("div");
+      shipSunkText.classList.add("sunkText");
+      shipSunkText.textContent = `You sunk their ${shipSunk}!`;
+      screenBlockerWrapper.appendChild(shipSunkText);
+    } else if (shipHit !== null) {
+      const shipHitText = document.createElement("div");
+      shipHitText.classList.add("hitText");
+      shipHitText.textContent = shipHit ? "You Hit!!!" : "You Missed!";
+      screenBlockerWrapper.appendChild(shipHitText);
     }
 
     const screenBlockerSecondaryText = document.createElement("div");
@@ -275,7 +242,6 @@ class DomManip {
           tileElement.classList.remove("hidden");
         }
       });
-      9;
     });
   }
 
@@ -306,6 +272,8 @@ class DomManip {
     closeButton.textContent = "Continue";
 
     closeButton.addEventListener("click", () => {
+      const screenWrapper = document.querySelector(".screenBlocker");
+      screenWrapper.remove();
       closeButton.remove();
     });
     return closeButton;
@@ -338,6 +306,8 @@ class DomManip {
     const tile = event.target;
     const row = parseInt(tile.dataset.row);
     const col = parseInt(tile.dataset.col);
+    let shipSunk = null;
+    let shipHit = null;
 
     const playerId = parseInt(tile.dataset.playerId);
 
@@ -389,19 +359,19 @@ class DomManip {
           );
 
           if (tileToMark) {
-            if (
-              this.players[playerId - 1].gameBoard.receiveAttack(
-                [row, col],
-                this.OnGameEnd
-              )
-            ) {
+            const attackResult = this.players[
+              playerId - 1
+            ].gameBoard.receiveAttack([row, col], this.OnGameEnd);
+            shipHit = attackResult.hit;
+            shipSunk = attackResult.sunk;
+
+            if (shipHit) {
               tileToMark.classList.add("shipHit");
-              shipHit = true;
             } else {
               tileToMark.classList.add("miss");
             }
 
-            this.handleStateChange(shipHit);
+            this.handleStateChange(shipHit, shipSunk);
           }
         }
         this.rotation = "horizontal";
@@ -472,7 +442,7 @@ class DomManip {
     return shipTiles;
   }
 
-  handleStateChange(shipHit = null) {
+  handleStateChange(shipHit = null, shipSunk = null) {
     switch (this.gameState.getState()) {
       case 0:
         this.generateScreenBlocker("Player 2's Setup");
@@ -501,7 +471,7 @@ class DomManip {
 
         break;
       case 2:
-        this.generateScreenBlocker("Player 2's Turn", shipHit);
+        this.generateScreenBlocker("Player 2's Turn", shipHit, shipSunk);
 
         this.currentPlayer = this.players[1].playerId;
 
@@ -513,7 +483,7 @@ class DomManip {
 
         break;
       case 3:
-        this.generateScreenBlocker("Player 1's Turn", shipHit);
+        this.generateScreenBlocker("Player 1's Turn", shipHit, shipSunk);
 
         this.currentPlayer = this.players[0].playerId;
 

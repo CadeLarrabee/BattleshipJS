@@ -66,16 +66,18 @@ class gameBoard {
     }
   }
   receiveAttack(coordinate, onGameEnd) {
-    //Returns true if hit, or if the hit ends the game, call onGameEnd to begin end-game
     const ship = this.board[coordinate[0]][coordinate[1]].getShip();
     if (ship) {
       ship.addHit();
       if (ship.isSunk()) {
-        if (this.removeShipFromBoard(ship, onGameEnd));
+        if (this.removeShipFromBoard(ship, onGameEnd)) {
+          onGameEnd();
+        }
+        return { hit: true, sunk: ship.type };
       }
-      return true;
+      return { hit: true, sunk: null };
     } else {
-      return false;
+      return { hit: false, sunk: null };
     }
   }
 }
